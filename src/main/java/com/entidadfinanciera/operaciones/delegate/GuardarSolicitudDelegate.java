@@ -11,6 +11,6 @@ public class GuardarSolicitudDelegate implements JavaDelegate {
     public void execute(DelegateExecution execution) throws Exception {
         String solicitudId = (String) execution.getVariable("solicitudId");
         System.out.println(">>> El proceso de Camunda procesó la solicitud con ID: " + solicitudId);
-        // Aquí puedes realizar validaciones adicionales de riesgo o modificar el estado en la BD si lo deseas
+
     }
 }

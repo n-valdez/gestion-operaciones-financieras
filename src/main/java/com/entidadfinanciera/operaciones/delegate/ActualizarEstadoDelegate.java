@@ -19,7 +19,6 @@ public class ActualizarEstadoDelegate implements JavaDelegate {
         String solicitudId = (String) execution.getVariable("solicitudId");
         Boolean aprobado = (Boolean) execution.getVariable("aprobado");
 
-        // También podemos obtener el nombre de la actividad actual del proceso si queremos mayor detalle
         String nombreActividad = execution.getCurrentActivityName();
 
         if (solicitudId != null) {
@@ -27,7 +26,7 @@ public class ActualizarEstadoDelegate implements JavaDelegate {
             if (solicitud != null) {
                 String nuevoEstado;
 
-                // Determinamos el estado de manera dinámica según la lógica del negocio
+                // Determinamos el estado
                 if (aprobado != null && !aprobado) {
                     nuevoEstado = "RECHAZADA";
                 } else if (nombreActividad != null && nombreActividad.contains("Riesgo")) {

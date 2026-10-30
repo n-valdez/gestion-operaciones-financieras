@@ -18,7 +18,7 @@ public class TareaController {
     @Autowired
     private TaskService taskService;
 
-    // 1. Listar todas las tareas pendientes de aprobación en Camunda
+    // Listar todas las tareas pendientes de aprobación en Camunda
     @GetMapping("/pendientes")
     public ResponseEntity<List<Map<String, Object>>> obtenerTareasPendientes() {
         List<Task> tasks = taskService.createTaskQuery().list();
@@ -36,7 +36,7 @@ public class TareaController {
         return ResponseEntity.ok(resultado);
     }
 
-    // 2. Aprobar o rechazar una tarea específica por su ID
+    // Aprobar o rechazar una tarea específica por su ID
     @PostMapping("/{taskId}/completar")
     public ResponseEntity<String> completarTarea(
             @PathVariable String taskId,

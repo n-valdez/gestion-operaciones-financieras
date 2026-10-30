@@ -43,7 +43,6 @@ public class SolicitudEntity implements Persistable<String> {
     @Column(nullable = false)
     private Long version;
 
-    // --- Control para evitar el error "Detached entity passed to persist" ---
     @Transient
     private boolean nuevaEntidad = true;
 
