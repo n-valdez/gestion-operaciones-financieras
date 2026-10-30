@@ -12,6 +12,7 @@ Solución backend desarrollada en **Spring Boot** e integrada con el motor de fl
 * **PostgreSQL** (Base de datos relacional)
 * **Gradle** (Gestor de dependencias)
 * **Springdoc OpenAPI / Swagger** (Documentación interactiva de la API)
+* **JUnit 5** (Pruebas automatizadas)
 
 ---
 
@@ -26,7 +27,7 @@ Asegúrate de contar con los siguientes elementos instalados en tu entorno de de
 
 ## ⚙️ Configuración del Proyecto
 
-Configura las credenciales de tu base de datos en el archivo `src/main/resources/application.yml` (o `application.properties`):
+Configura las credenciales de tu base de datos en el archivo `application.properties`:
 
 ```yaml
 spring:
@@ -52,72 +53,86 @@ Bash
 
 ---
 
-## 🏗️ Decisiones Arquitectónicas y Patrones de Diseño
-La solución implementa patrones de diseño clave para resolver desafíos reales del dominio financiero y mantener la extensibilidad sin contaminar el núcleo del negocio:
+## 🏗️ Diagrama de Arquitectura
 
-### 1. Patrón State (Estado)
-Problema que resuelve: Controlar el ciclo de vida de una solicitud financiera y sus transiciones válidas (PENDIENTE, APROBADA, RECHAZADA, CANCELADA) sin acoplar la lógica con condicionales complejos.
+La solución se estructura bajo un enfoque de **Monolito Modular**, asegurando bajo acoplamiento y una clara separación de responsabilidades:
 
-Por qué se seleccionó: Permite que el motor de Camunda y la persistencia relacional en PostgreSQL mantengan sincronización estricta sobre el estado actual de cada operación.
-
-Alternativas consideradas: Máquinas de estados caseras mediante enums y bloques if/else, descartadas por su alta complejidad de mantenimiento y falta de visibilidad del flujo.
-
-### 2. Patrón Adapter / Service Delegate
-   Problema que resuelve: Desacoplar el motor BPMN de la capa de servicios y persistencia en Spring Boot.
-
-Por qué se seleccionó: Las clases que implementan JavaDelegate funcionan como adaptadores transparentes que traducen las variables del proceso Camunda a ejecuciones de servicios JPA.
-
-Alternativas consideradas: Lógica de negocio embebida en scripts dentro del diagrama BPMN, descartada por dificultar las pruebas unitarias y el control de excepciones.
-
-### 3. Patrón Observer / Domain Events (Observador / Eventos de Dominio)
-   Problema que resuelve: Registrar y auditar cada cambio de estado, tarea completada e hito del proceso financiero sin acoplar los módulos principales al sistema de bitácora.
-
-Por qué se seleccionó: El motor de Camunda (HistoryService) funciona bajo este principio, escuchando y registrando eventos de manera asíncrona.
-
-Alternativas consideradas: Triggers manuales en base de datos, descartados por menor portabilidad y falta de trazabilidad en la capa de aplicación.
-
-### 4. Patrón Strategy (Estrategia) / Enrutamiento Dinámico
-   Problema que resuelve: Determinar dinámicamente la ruta de aprobación (automática, supervisor, gerencia o riesgos) en función del monto y el nivel de riesgo.
-
-Por qué se seleccionó: Las compuertas exclusivas/paralelas y los delegados de evaluación encapsulan las reglas de negocio en estrategias independientes según los criterios de la operación.
-
-Alternativas consideradas: Estructuras de decisión monolíticas en los controladores REST, descartadas por violar el principio de Responsabilidad Única y Abierto/Cerrado (SOLID).
+* **Capa Cliente / API REST:** Controladores de Spring Boot expuestos para la interacción con interfaces externas y documentados de forma interactiva con Swagger.
+* **Capa de Negocio y Orquestación:** El motor de Camunda BPM procesa las reglas del negocio, evaluando compuertas exclusivas, compuertas paralelas de aprobación y temporizadores (timers) de escalamiento.
+* **Capa de Persistencia:** Spring Data JPA conectado a PostgreSQL, garantizando la persistencia transaccional y el aislamiento de datos mediante bloqueo optimista.
 
 ---
 
-## 📚 Documentación de la API (Swagger UI)
-El proyecto cuenta con documentación interactiva integrada mediante OpenAPI. Para probar todos los endpoints de forma visual sin necesidad de herramientas externas, ingresa a la siguiente URL en tu navegador:
+## 📊 Diagrama BPMN
 
-👉 http://localhost:8080/swagger-ui/index.html
+El flujo completo del proceso de negocio está modelado bajo la notación BPMN 2.0. Puedes visualizar la imagen del diagrama exportada en el repositorio dentro de la carpeta de documentación:
+👉 **[Ver Diagrama BPMN en Docs](./docs/diagrama-bpmn.png)**
+
+---
+
+## 💡 Patrones de Diseño Utilizados
+
+* **State (Estado):** Controla el ciclo de vida de la solicitud (`PENDIENTE`, `APROBADA`, `RECHAZADA`, `CANCELADA`) sincronizado con el motor de procesos.
+* **Adapter / Service Delegate:** Desacopla el motor Camunda de la lógica de negocio mediante clases que implementan `JavaDelegate`.
+* **Observer / Domain Events:** Permite la auditoría y seguimiento del historial de instancias y cambios de estado de forma asíncrona mediante el motor histórico de Camunda (`HistoryService`).
+* **Strategy (Enrutamiento Dinámico):** Encapsula las reglas para determinar rutas de aprobación (automática, supervisor, gerencia o riesgos) según montos y criterios de la solicitud.
 
 ---
 
-## 🔌 Endpoints Principales
+## 📚 Documentación de los Endpoints (API REST)
 
-La API REST cumple con todos los requerimientos:
+El proyecto cuenta con contratos limpios y respuestas HTTP estandarizadas. La documentación interactiva (OpenAPI / Swagger) está disponible al ejecutar la aplicación en:
+👉 **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
 
-### Gestión de Solicitudes:
-
-#### POST /api/operaciones/iniciar - Crea una nueva solicitud e inicia la instancia en Camunda.
-
-#### GET /api/operaciones - Consulta todas las solicitudes y sus estados actuales.
-
-#### GET /api/operaciones/{id} - Consulta una solicitud específica por su ID.
-
-#### PUT /api/operaciones/{id}/cancelar - Cancela una solicitud activa y suspende su proceso.
-
-#### PUT /api/operaciones/{id}/reenviar - Modifica y reenvía una solicitud corregida.
-
-### Gestión de Tareas (Motor Camunda):
-
-#### GET /api/tareas/pendientes - Lista todas las tareas humanas pendientes de aprobación.
-
-#### POST /api/tareas/{taskId}/completar - Aprueba o rechaza una tarea específica mediante parámetros (?aprobado=true/false).
-
-### Auditoría e Instancias:
-
-#### GET /api/operaciones/historial/auditoria - Consulta el historial de instancias de procesos finalizados.
-
-#### GET /api/operaciones/instancias/activas - Consulta el estado de las instancias de proceso en ejecución.
+Endpoints principales:
+* `POST /api/operaciones/iniciar` - Crea solicitud e inicia instancia en Camunda.
+* `GET /api/operaciones` - Consulta todas las solicitudes.
+* `GET /api/operaciones/{id}` - Consulta solicitud por ID.
+* `PUT /api/operaciones/{id}/cancelar` - Cancela solicitud activa.
+* `PUT /api/operaciones/{id}/reenviar` - Modifica y reenvía solicitud corregida.
+* `GET /api/tareas/pendientes` - Lista tareas humanas pendientes.
+* `POST /api/tareas/{taskId}/completar` - Aprueba o rechaza tarea (`?aprobado=true/false`).
+* `GET /api/operaciones/historial/auditoria` - Historial y auditoría de procesos.
+* `GET /api/operaciones/instancias/activas` - Estado de instancias en ejecución.
 
 ---
+
+## 🗄️ Scripts de Base de Datos y Migraciones
+
+La aplicación está configurada mediante Hibernate (`spring.jpa.hibernate.ddl-auto=update`), lo que permite que las tablas, esquemas relacionales y restricciones se creen y actualicen de forma automática e integrada en PostgreSQL al iniciar el sistema.
+
+---
+
+## 🧪 Pruebas Automatizadas
+
+El proyecto incluye pruebas unitarias y de integración desarrolladas con **JUnit 5**. Para verificar que todas las pruebas pasen de forma exitosa, ejecuta en tu terminal:
+```
+bash
+./gradlew test
+
+```
+
+---
+
+## 🎮 Guía para Reproducir los Escenarios de Negocio
+Para probar el flujo completo de la aplicación:
+
+Inicia la aplicación ejecutando:
+
+```
+Bash
+./gradlew bootRun
+```
+
+Crea una nueva solicitud de operación mediante un cliente HTTP (o Swagger) haciendo un POST a /api/operaciones/iniciar.
+
+Consulta las tareas humanas que quedaron pendientes en el motor con un GET a /api/tareas/pendientes.
+
+Completa la aprobación de la tarea enviando un POST a /api/tareas/{taskId}/completar?aprobado=true.
+
+## ⚖️ Decisiones Arquitectónicas y Limitaciones Conocidas
+#### Elección del Monolito Modular: 
+Se seleccionó por encima de una arquitectura de microservicios distribuida para garantizar la atomicidad transaccional ACID estricta entre el motor Camunda y la base de datos relacional PostgreSQL, reduciendo la complejidad de red innecesaria para este dominio.
+
+#### Control de Concurrencia: 
+Se implementó bloqueo optimista (@Version) para mitigar condiciones de carrera cuando múltiples aprobadores intentan interactuar simultáneamente con la misma tarea.
