@@ -42,15 +42,12 @@ public class OperacionController {
             @RequestParam String descripcion,
             @RequestParam String nivelRiesgo) {
 
-        // 1. Generamos un ID único para la solicitud
         String solicitudId = UUID.randomUUID().toString();
 
-        // 2. Guardamos directamente en PostgreSQL desde el controlador de forma limpia
         solicitudService.registrarSolicitudDirecta(
                 solicitudId, usuarioSolicitante, tipoOperacion, monto, moneda, descripcion, nivelRiesgo
         );
 
-        // 3. Pasamos el ID y los datos al motor de Camunda para que el proceso avance
         Map<String, Object> variables = new HashMap<>();
         variables.put("solicitudId", solicitudId);
         variables.put("usuarioSolicitante", usuarioSolicitante);
@@ -65,7 +62,7 @@ public class OperacionController {
         return ResponseEntity.ok("¡Solicitud guardada en PostgreSQL e instancia de Camunda iniciada con éxito! ID: " + solicitudId);
     }
 
-    // 1. Cancelar una solicitud
+    // Cancelar una solicitud
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<String> cancelarSolicitud(@PathVariable String id) {
         SolicitudEntity solicitud = solicitudRepository.findById(id).orElse(null);
@@ -76,7 +73,6 @@ public class OperacionController {
         solicitud.setEstado("CANCELADA");
         solicitudRepository.save(solicitud);
 
-        // Opcional: Si deseas suspender/matar la instancia en Camunda asociada a esta solicitud
         runtimeService.createProcessInstanceQuery()
                 .variableValueEquals("solicitudId", id)
                 .list()
@@ -85,7 +81,7 @@ public class OperacionController {
         return ResponseEntity.ok("La solicitud " + id + " ha sido cancelada exitosamente.");
     }
 
-    // 2. Reenviar una solicitud corregida
+    // Reenviar una solicitud corregida
     @PutMapping("/{id}/reenviar")
     public ResponseEntity<String> reenviarSolicitud(@PathVariable String id, @RequestBody SolicitudEntity datosActualizados) {
         SolicitudEntity solicitud = solicitudRepository.findById(id).orElse(null);
@@ -96,13 +92,13 @@ public class OperacionController {
         // Actualizamos los campos necesarios para la corrección
         solicitud.setMonto(datosActualizados.getMonto());
         solicitud.setDescripcion(datosActualizados.getDescripcion());
-        solicitud.setEstado("PENDIENTE"); // Vuelve a estado pendiente para reevaluación
+        solicitud.setEstado("PENDIENTE");
         solicitudRepository.save(solicitud);
 
         return ResponseEntity.ok("La solicitud " + id + " ha sido corregida y reenviada para revisión.");
     }
 
-    // 3. Consultar historial y auditoría (Usando HistoryService de Camunda)
+    // Consultar historial y auditoría (Usando HistoryService de Camunda)
     @GetMapping("/historial/auditoria")
     public ResponseEntity<List<Map<String, Object>>> consultarHistorialAuditoria() {
         List<HistoricProcessInstance> historicInstances = historyService.createHistoricProcessInstanceQuery()
@@ -122,7 +118,7 @@ public class OperacionController {
         return ResponseEntity.ok(historial);
     }
 
-    // 4. Consultar el estado de las instancias de proceso activas
+    // Consultar el estado de las instancias de proceso activas
     @GetMapping("/instancias/activas")
     public ResponseEntity<List<Map<String, Object>>> consultarInstanciasActivas() {
         List<ProcessInstance> activeInstances = runtimeService.createProcessInstanceQuery().list();
