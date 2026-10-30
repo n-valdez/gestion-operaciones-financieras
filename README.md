@@ -66,7 +66,7 @@ La solución se estructura bajo un enfoque de **Monolito Modular**, asegurando b
 ## Diagrama BPMN
 
 El flujo completo del proceso de negocio está modelado bajo la notación BPMN 2.0. Puedes visualizar la imagen del diagrama exportada en el repositorio dentro de la carpeta de documentación:
-👉 **[Ver Diagrama BPMN en Docs](./docs/diagrama-bpmn.png)**
+**(./docs/diagrama-bpmn.png)**
 
 ---
 
