@@ -4,7 +4,7 @@ Solución backend desarrollada en **Spring Boot** e integrada con el motor de fl
 
 ---
 
-## 🚀 Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 * **Java 21**
 * **Spring Boot** (Web, Data JPA)
@@ -16,7 +16,7 @@ Solución backend desarrollada en **Spring Boot** e integrada con el motor de fl
 
 ---
 
-## 📋 Prerrequisitos para la Ejecución
+## Prerrequisitos para la Ejecución
 
 Asegúrate de contar con los siguientes elementos instalados en tu entorno de desarrollo:
 1. **JDK 21** configurado en tu IDE (IntelliJ IDEA recomendado).
@@ -25,7 +25,7 @@ Asegúrate de contar con los siguientes elementos instalados en tu entorno de de
 
 ---
 
-## ⚙️ Configuración del Proyecto
+## Configuración del Proyecto
 
 Configura las credenciales de tu base de datos en el archivo `application.properties`:
 
@@ -43,7 +43,7 @@ spring:
 
 ---
 
-## ▶️ Cómo Ejecutar la Aplicación
+## ️Cómo Ejecutar la Aplicación
 Puedes iniciar el proyecto ejecutando la siguiente tarea de Gradle desde tu terminal o consola:
 
 ```bash
@@ -53,7 +53,7 @@ Bash
 
 ---
 
-## 🏗️ Diagrama de Arquitectura
+## Diagrama de Arquitectura
 
 La solución se estructura bajo un enfoque de **Monolito Modular**, asegurando bajo acoplamiento y una clara separación de responsabilidades:
 
@@ -63,14 +63,14 @@ La solución se estructura bajo un enfoque de **Monolito Modular**, asegurando b
 
 ---
 
-## 📊 Diagrama BPMN
+## Diagrama BPMN
 
 El flujo completo del proceso de negocio está modelado bajo la notación BPMN 2.0. Puedes visualizar la imagen del diagrama exportada en el repositorio dentro de la carpeta de documentación:
 👉 **[Ver Diagrama BPMN en Docs](./docs/diagrama-bpmn.png)**
 
 ---
 
-## 💡 Patrones de Diseño Utilizados
+## Patrones de Diseño Utilizados
 
 * **State (Estado):** Controla el ciclo de vida de la solicitud (`PENDIENTE`, `APROBADA`, `RECHAZADA`, `CANCELADA`) sincronizado con el motor de procesos.
 * **Adapter / Service Delegate:** Desacopla el motor Camunda de la lógica de negocio mediante clases que implementan `JavaDelegate`.
@@ -79,10 +79,10 @@ El flujo completo del proceso de negocio está modelado bajo la notación BPMN 2
 
 ---
 
-## 📚 Documentación de los Endpoints (API REST)
+## Documentación de los Endpoints (API REST)
 
 El proyecto cuenta con contratos limpios y respuestas HTTP estandarizadas. La documentación interactiva (OpenAPI / Swagger) está disponible al ejecutar la aplicación en:
-👉 **[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
+**[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)**
 
 Endpoints principales:
 * `POST /api/operaciones/iniciar` - Crea solicitud e inicia instancia en Camunda.
@@ -97,13 +97,13 @@ Endpoints principales:
 
 ---
 
-## 🗄️ Scripts de Base de Datos y Migraciones
+## Scripts de Base de Datos y Migraciones
 
 La aplicación está configurada mediante Hibernate (`spring.jpa.hibernate.ddl-auto=update`), lo que permite que las tablas, esquemas relacionales y restricciones se creen y actualicen de forma automática e integrada en PostgreSQL al iniciar el sistema.
 
 ---
 
-## 🧪 Pruebas Automatizadas
+## Pruebas Automatizadas
 
 El proyecto incluye pruebas unitarias y de integración desarrolladas con **JUnit 5**. Para verificar que todas las pruebas pasen de forma exitosa, ejecuta en tu terminal:
 ```
@@ -114,7 +114,7 @@ bash
 
 ---
 
-## 🎮 Guía para Reproducir los Escenarios de Negocio
+## Guía para Reproducir los Escenarios de Negocio
 Para probar el flujo completo de la aplicación:
 
 Inicia la aplicación ejecutando:
@@ -130,7 +130,7 @@ Consulta las tareas humanas que quedaron pendientes en el motor con un GET a /ap
 
 Completa la aprobación de la tarea enviando un POST a /api/tareas/{taskId}/completar?aprobado=true.
 
-## ⚖️ Decisiones Arquitectónicas y Limitaciones Conocidas
+## Decisiones Arquitectónicas y Limitaciones Conocidas
 #### Elección del Monolito Modular: 
 Se seleccionó por encima de una arquitectura de microservicios distribuida para garantizar la atomicidad transaccional ACID estricta entre el motor Camunda y la base de datos relacional PostgreSQL, reduciendo la complejidad de red innecesaria para este dominio.
 
